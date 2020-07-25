@@ -1,0 +1,121 @@
+package vn.edu.ntu.quangloc.on_thi2;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import vn.edu.ntu.quangloc.controller.IContactController;
+import vn.edu.ntu.quangloc.model.Contact;
+
+public class FirstFragment extends Fragment {
+
+    List<Contact> listContacts = new ArrayList<>();
+    RecyclerView rvListContact;
+    ContactAdapter adapter;
+    IContactController controller;
+    NavController navController;
+
+    @Override
+    public View onCreateView(
+            LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState
+    ) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_first, container, false);
+        addViews(view);
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setHasOptionsMenu(true);
+//        view.findViewById(R.id.itemAdd).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                NavHostFragment.findNavController(FirstFragment.this)
+//                        .navigate(R.id.action_FirstFragment_to_SecondFragment);
+//            }
+//        });
+    }
+
+    private void addViews(View view) {
+        rvListContact = view.findViewById(R.id.rvListContact);
+        controller = (IContactController) ((MainActivity)getActivity()).getApplication();
+        listContacts = controller.getAllContact();
+        adapter = new ContactAdapter(listContacts);
+
+        navController = NavHostFragment.findNavController(FirstFragment.this);
+        ((MainActivity)getActivity()).navController = navController;
+        ((MainActivity)getActivity()).toolbar.setSubtitle("List of All Friends");
+
+        rvListContact.setLayoutManager(new LinearLayoutManager(getActivity()));
+        rvListContact.setAdapter(adapter);
+    }
+
+    public class ContactViewHolder extends RecyclerView.ViewHolder {
+        TextView txtName, txtDate, txtPhone;
+        ImageView imvEdit;
+        Contact contact;
+
+        public ContactViewHolder(@NonNull View itemView) {
+            super(itemView);
+            txtName = itemView.findViewById(R.id.txtName);
+            txtDate = itemView.findViewById(R.id.txtDate);
+            txtPhone = itemView.findViewById(R.id.txtPhone);
+        }
+
+        public void bind(Contact contact) {
+            txtName.setText(contact.getName());
+            txtDate.setText(contact.getBirthday());
+            txtPhone.setText(contact.getPhone());
+        }
+
+    }
+
+    public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder> {
+
+        List<Contact> listContacts = new ArrayList<>();
+
+        public ContactAdapter(List<Contact> listContacts) {
+            this.listContacts = listContacts;
+        }
+
+        @NonNull
+        @Override
+        public ContactViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = getLayoutInflater();
+            View view = inflater.inflate(R.layout.contact, parent, false);
+            return new ContactViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ContactViewHolder holder, int position) {
+            holder.bind(listContacts.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return listContacts.size();
+        }
+    }
+
+}
